@@ -7,6 +7,7 @@ class Player:
         self.cards = []
         self.cards_in_dispute = []
         self.color = color
+        self.objective_card = None
 
     def add_card(self, newCard):
         if isinstance(newCard, list):

@@ -21,3 +21,7 @@ def create_game(players: List[PlayerData]):
         return {"Message": "Game Created with Sucess!", "Players":game.show_players()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/players")
+def get_players():
+    return game.show_players()
