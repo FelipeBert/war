@@ -11,6 +11,9 @@ class PlayerData(BaseModel):
     name: str
     color: Color
 
+class DiceResults(BaseModel):
+    dice_results: List[int]
+
 game = Game()
 
 @app.post("/create-game")
@@ -25,3 +28,7 @@ def create_game(players: List[PlayerData]):
 @app.get("/players")
 def get_players():
     return game.show_players()
+
+@app.post("/set-order")
+def set_order(dice_results:DiceResults):
+    return game.set_order(dice_results.dice_results)

@@ -22,9 +22,19 @@ class Game():
 
         self.assign_objective()
 
+    def set_order(self, dice_results: List[int]):
+        if len(dice_results) != len(self.players):
+            raise ValueError("The number of dice results does not correspond to the number of players.")
+        
+        results = list(zip(self.players, dice_results))
+        
+        results_sorted = sorted(results, key=lambda x: x[1], reverse=True)
+        
+        self.players = [player for player, _ in results_sorted]
+
     def show_players(self):
         return [
-            {"Name": player.name, "Color": player.color.name, "id": str(player.player_id), "Objective": player.objective_card}
+            {"Name": player.name, "Color": player.color.name, "id": str(player.player_id), "Objective": player.objective_card, "Game id": self.game_id}
             for player in self.players
         ]
     
