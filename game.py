@@ -10,6 +10,7 @@ class Game():
         self.game_id = uuid.uuid4()
         self.players = []
         self.objective_deck = self.create_objective_deck()
+        self.territories = self.create_territories()
 
     def set_players(self, players: List[Player]):
         colors = set()
@@ -21,6 +22,7 @@ class Game():
             self.players.append(player)
 
         self.assign_objective()
+        self.assign_territories()
 
     def set_order(self, dice_results: List[int]):
         if len(dice_results) != len(self.players):
@@ -34,13 +36,41 @@ class Game():
 
     def show_players(self):
         return [
-            {"Name": player.name, "Color": player.color.name, "id": str(player.player_id), "Objective": player.objective_card, "Game id": self.game_id}
+            {"Name": player.name, "Color": player.color.name,
+             "id": str(player.player_id),
+             "Objective": player.objective_card,
+             "Territories": player.territories,
+             "Game id": self.game_id}
             for player in self.players
         ]
+    
+    def assign_territories(self):
+        random.shuffle(self.territories)
+        num_players = len(self.players)
+
+        for i, player in enumerate(self.players):
+            player_territores = self.territories[i::num_players]
+            player.assign_territories(player_territores)
     
     def assign_objective(self):
         for player in self.players:
             player.objective_card = self.draw_objective_card()
+
+    def create_territories(self):
+        return [
+            "América do Sul",
+            "Europa",
+            "Ásia",
+            "Oceania",
+            "América do Norte",
+            "África",
+            "América Central",
+            "Caribe",
+            "Oriente Médio",
+            "Sudeste Asiático",
+            "Europa Oriental",
+            "Ásia Central"
+        ]
 
     def create_objective_deck(self):
         objectives = [

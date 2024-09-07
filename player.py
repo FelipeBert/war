@@ -8,6 +8,7 @@ class Player:
         self.cards_in_dispute = []
         self.color = color
         self.objective_card = None
+        self.territories = []
 
     def add_card(self, newCard):
         if isinstance(newCard, list):
@@ -19,6 +20,10 @@ class Player:
         if self.have_cards:
             return self.cards.pop(0)
         return None
+    
+
+    def assign_territories(self, territores):
+        self.territories = territores
     
     @property
     def have_cards(self):
