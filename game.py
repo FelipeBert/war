@@ -1,9 +1,10 @@
 import uuid
 import random
 from player import Player
-from colors import Color
 from typing import List
 from objective_card import ObjectiveCard
+from territory import Territory
+from troopDistributionItem import TroopDistributionItem
 
 class Game():
     def __init__(self):
@@ -23,6 +24,7 @@ class Game():
 
         self.assign_objective()
         self.assign_territories()
+        self.assign_troops()
 
     def set_order(self, dice_results: List[int]):
         if len(dice_results) != len(self.players):
@@ -38,12 +40,18 @@ class Game():
         return [
             {"Name": player.name, "Color": player.color.name,
              "id": str(player.player_id),
-             "Objective": player.objective_card,
+             "Objective": player.objective_card,    
+             "Troops": player.troops,
              "Territories": player.territories,
              "Game id": self.game_id}
             for player in self.players
         ]
     
+    def assign_troops(self):
+        for player in self.players:
+            troops = len(player.territories) / 2
+            player.troops = max(1, int(troops))
+
     def assign_territories(self):
         random.shuffle(self.territories)
         num_players = len(self.players)
@@ -58,18 +66,44 @@ class Game():
 
     def create_territories(self):
         return [
-            "América do Sul",
-            "Europa",
-            "Ásia",
-            "Oceania",
-            "América do Norte",
-            "África",
-            "América Central",
-            "Caribe",
-            "Oriente Médio",
-            "Sudeste Asiático",
-            "Europa Oriental",
-            "Ásia Central"
+            Territory("América do Sul"),
+            Territory("Europa"),
+            Territory("Ásia"),
+            Territory("Oceania"),
+            Territory("América do Norte"),
+            Territory("África"),
+            Territory("América Central"),
+            Territory("Caribe"),
+            Territory("Oriente Médio"),
+            Territory("Sudeste Asiático"),
+            Territory("Europa Oriental"),
+            Territory("Ásia Central"),
+            Territory("Oceania Oriental"),
+            Territory("Oceania Ocidental"),
+            Territory("Ásia Oriental"),
+            Territory("Ásia Meridional"),
+            Territory("Ásia Setentrional"),
+            Territory("África Oriental"),
+            Territory("África Ocidental"),
+            Territory("África Central"),
+            Territory("África Austral"),
+            Territory("América do Sul Oriental"),
+            Territory("América do Sul Ocidental"),
+            Territory("América Central Norte"),
+            Territory("América Central Sul"),
+            Territory("Caribe Oriental"),
+            Territory("Caribe Ocidental"),
+            Territory("Oriente Médio Norte"),
+            Territory("Oriente Médio Sul"),
+            Territory("Europa Ocidental"),
+            Territory("Europa Meridional"),
+            Territory("Europa Setentrional"),
+            Territory("Europa Central"),
+            Territory("Sudeste Asiático Norte"),
+            Territory("Sudeste Asiático Sul"),
+            Territory("Sudeste Asiático Central"),
+            Territory("Ásia Central Norte"),
+            Territory("Ásia Central Sul")
         ]
 
     def create_objective_deck(self):
@@ -86,10 +120,10 @@ class Game():
             "Conquistar 24 TERRITÓRIOS à sua escolha.",
             "Conquistar na totalidade a AMÉRICA DO NORTE e a OCEANIA.",
             "Destruir totalmente OS EXÉRCITOS AZUIS.",
-            "Destruir totalmente OS EXÉRCITOS AMARELOS."
-            "Destruir totalmente OS EXÉRCITOS VERMELHOS."
+            "Destruir totalmente OS EXÉRCITOS AMARELOS.",
+            "Destruir totalmente OS EXÉRCITOS VERMELHOS.",
             "Destruir totalmente OS EXÉRCITOS PRETOS.",
-            "Destruir totalmente OS EXÉRCITOS BRANCO."
+            "Destruir totalmente OS EXÉRCITOS BRANCO.",
             "Destruir totalmente OS EXÉRCITOS VERDES."
         ]
         return [ObjectiveCard(description) for description in objectives]
