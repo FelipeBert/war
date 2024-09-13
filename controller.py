@@ -1,54 +1,62 @@
+# controller.py
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from game import Game
-from player import Player
-from colors import Color
-from troopDistributionItem import TroopDistributionItem
+from jogo import Jogo
+from jogador import Jogador
+from cores import Cor
+from itemDistribuicaoTropas import ItemDistribuicaoTropas
 from uuid import UUID
 
 app = FastAPI()
 
-class PlayerData(BaseModel):
-    name: str
-    color: Color
+# Modelos de entrada para as requisições
+class DadosJogador(BaseModel):
+    nome: str
+    cor: Cor
 
-class DiceResults(BaseModel):
-    dice_results: List[int]
+class ResultadosDados(BaseModel):
+    resultados_dados: List[int]
 
-class TroopDistributionRequest(BaseModel):
-    player_id: UUID
-    troop_distribution: List[TroopDistributionItem]
+class RequisicaoDistribuicaoTropas(BaseModel):
+    id_jogador: UUID
+    distribuicao_tropas: List[ItemDistribuicaoTropas]
 
-game = Game()
+# Instância do jogo
+jogo = Jogo()
 
-@app.post("/create-game")
-def create_game(players: List[PlayerData]):
+# Rota para criar um novo jogo
+@app.post("/criar-jogo")
+def criar_jogo(jogadores: List[DadosJogador]):
     try:
-        player_obj = [Player(player.name, player.color) for player in players]
-        game.set_players(player_obj)
-        return {"Message": "Game Created with Sucess!", "Players":game.show_players()}
+        jogadores_obj = [Jogador(jogador.nome, jogador.cor) for jogador in jogadores]
+        jogo.definir_jogadores(jogadores_obj)
+        return {"Mensagem": "Jogo criado com sucesso!", "Jogadores": jogo.mostrar_jogadores()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.get("/players")
-def get_players():
-    return game.show_players()
+# Rota para listar os jogadores
+@app.get("/jogadores")
+def obter_jogadores():
+    return jogo.mostrar_jogadores()
 
-@app.post("/set-order")
-def set_order(dice_results:DiceResults):
-    return game.set_order(dice_results.dice_results)
+# Rota para definir a ordem dos jogadores com base nos dados
+@app.post("/definir-ordem")
+def definir_ordem(resultados_dados: ResultadosDados):
+    return jogo.definir_ordem(resultados_dados.resultados_dados)
 
-@app.post("/deploy-troops")
-def deploy_troops(troops: TroopDistributionRequest):
+# Rota para distribuir tropas nos territórios
+@app.post("/distribuir-tropas")
+def distribuir_tropas(tropas: RequisicaoDistribuicaoTropas):
     try:
-        player = next((p for p in game.players if p.player_id == troops.player_id), None)
+        jogador = next((j for j in jogo.jogadores if j.id_jogador == tropas.id_jogador), None)
 
-        if player is None:
-            raise HTTPException(status_code=404, detail="Player not found")
+        if jogador is None:
+            raise HTTPException(status_code=404, detail="Jogador não encontrado")
 
-        player.distribute_troops(troops.troop_distribution)
+        jogador.distribuir_tropas(tropas.distribuicao_tropas)
 
-        return {"message": "Troops successfully distributed"}
+        return {"mensagem": "Tropas distribuídas com sucesso"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
