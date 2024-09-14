@@ -46,4 +46,17 @@ def obter_jogadores():
 def definir_ordem(resultados_dados: ResultadosDados):
     return jogo.definir_ordem(resultados_dados.resultados_dados)
 
+# Rota para distribuir tropas nos territórios
+@app.post("/distribuir-tropas")
+def distribuir_tropas(tropas: RequisicaoDistribuicaoTropas):
+    try:
+        jogador = next((j for j in jogo.jogadores if j.id_jogador == tropas.id_jogador), None)
 
+        if jogador is None:
+            raise HTTPException(status_code=404, detail="Jogador não encontrado")
+
+        jogador.distribuir_tropas(tropas.distribuicao_tropas)
+
+        return {"mensagem": "Tropas distribuídas com sucesso"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
