@@ -32,7 +32,24 @@ class Jogador:
         else:
             self.territorios.append(territorios)
 
+    def distribuir_tropas(self, distribuicao_tropas: List[ItemDistribuicaoTropas]):
+        total_tropas_a_distribuir = sum(item.tropas for item in distribuicao_tropas)
 
+        if total_tropas_a_distribuir > self.tropas:
+            raise ValueError(f"Não há tropas suficientes. Disponível: {self.tropas}, necessário: {total_tropas_a_distribuir}")
+        
+        for item in distribuicao_tropas:
+            id_territorio = item.id_territorio
+            tropas = item.tropas
+
+            territorio = next((t for t in self.territorios if t.id_territorio == id_territorio), None)
+                
+            if territorio is None:
+                raise ValueError(f"Território com ID {id_territorio} não pertence ao jogador {self.nome}")
+                
+            territorio.adicionar_tropas(tropas)
+            
+        self.tropas -= total_tropas_a_distribuir
 
     @property
     def tem_cartas(self):
