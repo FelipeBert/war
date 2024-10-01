@@ -1,10 +1,35 @@
+from abc import ABC, abstractmethod
 import uuid
-from territorio import Territorio
 from typing import List
+from territorio import Territorio
 from itemDistribuicaoTropas import ItemDistribuicaoTropas
 
+class EstrategiaDistribuicaoTropas(ABC):
+    @abstractmethod
+    def distribuir(self, jogador, distribuicao_tropas: List[ItemDistribuicaoTropas]):
+        pass
+
+class DistribuicaoUniforme(EstrategiaDistribuicaoTropas):
+    def distribuir(self, jogador, distribuicao_tropas: List[ItemDistribuicaoTropas]):
+        total_tropas = jogador.tropas
+        num_territorios = len(jogador.territorios)
+        tropas_por_territorio = total_tropas // num_territorios
+        
+        for territorio in jogador.territorios:
+            territorio.adicionar_tropas(tropas_por_territorio)
+        
+        jogador.tropas = 0  
+        
+class DistribuicaoConcentrada(EstrategiaDistribuicaoTropas):
+    def distribuir(self, jogador, distribuicao_tropas: List[ItemDistribuicaoTropas]):
+        total_tropas = jogador.tropas
+        
+        if jogador.territorios:
+            jogador.territorios[0].adicionar_tropas(total_tropas)
+            jogador.tropas = 0 
+
 class Jogador:
-    def __init__(self, nome, cor):
+    def __init__(self, nome, cor, estrategia: EstrategiaDistribuicaoTropas):
         self.nome = nome
         self.id_jogador = uuid.uuid4()
         self.cartas = []
@@ -13,6 +38,7 @@ class Jogador:
         self.carta_objetivo = None
         self.territorios = []
         self.tropas = 0
+        self.estrategia = estrategia 
 
     def adicionar_carta(self, nova_carta):
         if isinstance(nova_carta, list):
@@ -33,23 +59,7 @@ class Jogador:
             self.territorios.append(territorios)
 
     def distribuir_tropas(self, distribuicao_tropas: List[ItemDistribuicaoTropas]):
-        total_tropas_a_distribuir = sum(item.tropas for item in distribuicao_tropas)
-
-        if total_tropas_a_distribuir > self.tropas:
-            raise ValueError(f"Não há tropas suficientes. Disponível: {self.tropas}, necessário: {total_tropas_a_distribuir}")
-        
-        for item in distribuicao_tropas:
-            id_territorio = item.id_territorio
-            tropas = item.tropas
-
-            territorio = next((t for t in self.territorios if t.id_territorio == id_territorio), None)
-                
-            if territorio is None:
-                raise ValueError(f"Território com ID {id_territorio} não pertence ao jogador {self.nome}")
-                
-            territorio.adicionar_tropas(tropas)
-            
-        self.tropas -= total_tropas_a_distribuir
+        self.estrategia.distribuir(self, distribuicao_tropas)
 
     @property
     def tem_cartas(self):
@@ -61,7 +71,7 @@ class Jogador:
     def resolver_disputa(self):
         self.cartas.extend(self.cartas_disputa)
         self.cartas_disputa = []
-
+    
     def contar_cartas(self):
         return len(self.cartas)
     
@@ -70,3 +80,12 @@ class Jogador:
     
     def __str__(self):
         return f"{self.nome} (ID: {self.id_jogador}) tem {len(self.cartas)} cartas e a cor {self.cor}."
+
+estrategia_uniforme = DistribuicaoUniforme()
+estrategia_concentrada = DistribuicaoConcentrada()
+
+jogador1 = Jogador("Jogador 1", "Azul", estrategia_uniforme)
+jogador2 = Jogador("Jogador 2", "Vermelho", estrategia_concentrada)
+
+jogador1.distribuir_tropas([])
+jogador2.distribuir_tropas([])
